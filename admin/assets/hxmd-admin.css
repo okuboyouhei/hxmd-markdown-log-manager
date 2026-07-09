@@ -1,0 +1,88 @@
+/* HXMD Admin Styles */
+
+.hxmd-filter-form { margin: 16px 0; }
+.hxmd-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.hxmd-filter-row select,
+.hxmd-filter-row input[type="date"],
+.hxmd-filter-row input[type="search"] {
+  height: 30px;
+  font-size: 13px;
+}
+
+.hxmd-bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f0f6fc;
+  border-left: 3px solid #0F6E56;
+  margin: 12px 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.hxmd-table .hxmd-col-check { width: 36px; }
+.hxmd-empty { text-align: center; color: #777; padding: 32px !important; }
+
+.hxmd-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #e0e0e0;
+  color: #333;
+}
+.hxmd-type-phone   { background: #dbeafe; color: #1e40af; }
+.hxmd-type-email   { background: #dcfce7; color: #166534; }
+.hxmd-type-meeting { background: #fef9c3; color: #854d0e; }
+.hxmd-type-memo    { background: #f3e8ff; color: #6b21a8; }
+.hxmd-badge-custom { background: #0F6E56; color: #fff; }
+
+.hxmd-priority         { font-weight: 600; }
+.hxmd-priority-high    { color: #dc2626; }
+.hxmd-priority-medium  { color: #d97706; }
+.hxmd-priority-low     { color: #6b7280; }
+
+.hxmd-status             { font-size: 12px; padding: 2px 6px; border-radius: 3px; }
+.hxmd-status-open        { background: #fee2e2; color: #991b1b; }
+.hxmd-status-in_progress { background: #fef3c7; color: #92400e; }
+.hxmd-status-done        { background: #d1fae5; color: #065f46; }
+
+.hxmd-md-preview {
+  background: #1e1e1e;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.hxmd-md-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #2d2d2d;
+  color: #d4d4d4;
+}
+.hxmd-pre {
+  margin: 0;
+  padding: 16px;
+  color: #d4d4d4;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: transparent;
+  border: none;
+}
+
+.hxmd-edit-form .form-table th { width: 160px; }
+.required { color: #dc2626; }
+
+.hxmd-settings-table       { max-width: 800px; }
+.hxmd-row-default td       { color: #777; }
+.hxmd-settings-table input { width: 100%; }

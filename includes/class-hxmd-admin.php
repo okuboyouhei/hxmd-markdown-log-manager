@@ -1,0 +1,156 @@
+<?php
+/**
+ * HXMD_Admin — 管理画面全般
+ */
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+class HXMD_Admin {
+
+	public static function init(): void {
+		if ( ! is_admin() ) { return; }
+		add_action( 'admin_menu',                    [ __CLASS__, 'register_menu' ] );
+		add_action( 'admin_enqueue_scripts',         [ __CLASS__, 'enqueue_assets' ] );
+		add_action( 'admin_post_hxmd_save_log',      [ __CLASS__, 'handle_save' ] );
+		add_action( 'admin_post_hxmd_delete_log',    [ __CLASS__, 'handle_delete' ] );
+		add_action( 'admin_post_hxmd_save_settings', [ __CLASS__, 'handle_save_settings' ] );
+		add_action( 'wp_ajax_hxmd_get_md',           [ __CLASS__, 'ajax_get_md' ] );
+	}
+
+	public static function register_menu(): void {
+		add_menu_page(
+			'HXMD',
+			'HXMD',
+			'manage_options',
+			'hxmd',
+			[ __CLASS__, 'page_list' ],
+			'dashicons-text-page',
+			30
+		);
+		add_submenu_page( 'hxmd', 'ログ一覧', 'ログ一覧', 'manage_options', 'hxmd',          [ __CLASS__, 'page_list' ] );
+		add_submenu_page( 'hxmd', '新規ログ', '新規ログ', 'manage_options', 'hxmd-new',      [ __CLASS__, 'page_edit' ] );
+		add_submenu_page( 'hxmd', '設定',     '設定',     'manage_options', 'hxmd-settings', [ __CLASS__, 'page_settings' ] );
+	}
+
+	public static function enqueue_assets( string $hook ): void {
+		$hxmd_hooks = [ 'toplevel_page_hxmd', 'hxmd_page_hxmd-new', 'hxmd_page_hxmd-settings' ];
+		if ( ! in_array( $hook, $hxmd_hooks, true ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'hxmd-admin',
+			HXMD_PLUGIN_URL . 'admin/assets/hxmd-admin.js',
+			[],
+			HXMD_VERSION,
+			true
+		);
+		wp_enqueue_script(
+			'hxmd-alpine',
+			HXMD_PLUGIN_URL . 'assets/alpine.min.js',
+			[],
+			'3.15.12',
+			[ 'strategy' => 'defer' ]
+		);
+		wp_enqueue_script(
+			'hxmd-htmx',
+			HXMD_PLUGIN_URL . 'assets/htmx.min.js',
+			[],
+			'2.0.10',
+			[ 'strategy' => 'defer' ]
+		);
+		wp_enqueue_style(
+			'hxmd-admin',
+			HXMD_PLUGIN_URL . 'admin/assets/hxmd-admin.css',
+			[],
+			HXMD_VERSION
+		);
+		wp_localize_script( 'hxmd-admin', 'hxmdData', [
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'hxmd_nonce' ),
+		] );
+	}
+
+	public static function page_list(): void {
+		if ( ! current_user_can( 'manage_options' ) ) { return; }
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- GETフィルターフォームのためnonce不要
+		$args = [
+			'log_type'  => sanitize_text_field( wp_unslash( $_GET['log_type']  ?? '' ) ),
+			'priority'  => sanitize_text_field( wp_unslash( $_GET['priority']  ?? '' ) ),
+			'status'    => sanitize_text_field( wp_unslash( $_GET['status']    ?? '' ) ),
+			'date_from' => sanitize_text_field( wp_unslash( $_GET['date_from'] ?? '' ) ),
+			'date_to'   => sanitize_text_field( wp_unslash( $_GET['date_to']   ?? '' ) ),
+			'search'    => sanitize_text_field( wp_unslash( $_GET['search']    ?? '' ) ),
+			'orderby'   => sanitize_text_field( wp_unslash( $_GET['orderby']   ?? 'log_date' ) ),
+			'order'     => sanitize_text_field( wp_unslash( $_GET['order']     ?? 'DESC' ) ),
+		];
+		// phpcs:enable
+		$logs  = HXMD_DB::get_logs( $args );
+		$types = HXMD_Log_Types::get_types();
+		include HXMD_PLUGIN_DIR . 'admin/views/list.php';
+	}
+
+	public static function page_edit(): void {
+		if ( ! current_user_can( 'manage_options' ) ) { return; }
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- 表示用GETパラメータのためnonce不要
+		$id  = intval( $_GET['id'] ?? 0 );
+		$log = $id ? HXMD_DB::get_log( $id ) : null;
+		$types = HXMD_Log_Types::get_types();
+		include HXMD_PLUGIN_DIR . 'admin/views/edit.php';
+	}
+
+	public static function page_settings(): void {
+		if ( ! current_user_can( 'manage_options' ) ) { return; }
+		$types = HXMD_Log_Types::get_types();
+		include HXMD_PLUGIN_DIR . 'admin/views/settings.php';
+	}
+
+	public static function handle_save(): void {
+		check_admin_referer( 'hxmd_save_log' );
+		if ( ! current_user_can( 'manage_options' ) ) { wp_die( 'Unauthorized' ); }
+
+		$id = intval( $_POST['id'] ?? 0 );
+		HXMD_DB::save_log( $_POST, $id );
+		wp_safe_redirect( admin_url( 'admin.php?page=hxmd&saved=1' ) );
+		exit;
+	}
+
+	public static function handle_delete(): void {
+		check_admin_referer( 'hxmd_delete_log' );
+		if ( ! current_user_can( 'manage_options' ) ) { wp_die( 'Unauthorized' ); }
+
+		$id = intval( $_POST['id'] ?? 0 );
+		HXMD_DB::delete_log( $id );
+		wp_safe_redirect( admin_url( 'admin.php?page=hxmd&deleted=1' ) );
+		exit;
+	}
+
+	public static function handle_save_settings(): void {
+		check_admin_referer( 'hxmd_save_settings' );
+		if ( ! current_user_can( 'manage_options' ) ) { wp_die( 'Unauthorized' ); }
+
+		$types = isset( $_POST['custom_types'] ) ? wp_unslash( $_POST['custom_types'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_custom_types() 内でサニタイズ済み
+		HXMD_Log_Types::save_custom_types( is_array( $types ) ? $types : [] );
+		wp_safe_redirect( admin_url( 'admin.php?page=hxmd-settings&saved=1' ) );
+		exit;
+	}
+
+	public static function ajax_get_md(): void {
+		check_ajax_referer( 'hxmd_nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized', 403 );
+		}
+
+		$ids = array_map( 'intval', (array) ( $_POST['ids'] ?? [] ) );
+		if ( empty( $ids ) ) {
+			wp_send_json_error( 'No IDs', 400 );
+		}
+
+		$logs = HXMD_DB::get_logs_by_ids( $ids );
+		$md   = count( $logs ) === 1
+			? HXMD_Markdown::render_single( $logs[0] )
+			: HXMD_Markdown::render_bulk( $logs );
+
+		wp_send_json_success( [ 'md' => $md ] );
+	}
+}

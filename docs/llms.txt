@@ -1,0 +1,40 @@
+# HXMD — Markdown Log Manager
+
+> WordPress plugin to collect inquiries and memos,
+> export as AI-ready Markdown. No API required.
+
+## Docs
+
+- [AI Reference](ai-reference.md)
+- [CLAUDE.md](CLAUDE.md)
+- [readme.txt](readme.txt)
+
+## Quick facts
+
+- Plugin slug: hxmd-markdown-log-manager
+- Version: 1.0.0
+- PHP: 8.1+
+- WordPress: 6.4+
+- Stack: Alpine.js 3.15.12 + htmx 2.0.10 (both bundled)
+- Storage: Custom table `{prefix}hxmd_logs`
+- No build step. No AI API. No front-end output.
+
+## Core concept
+
+Input: rough draft text (phone call notes, email summaries, meeting memos)
+Output: structured Markdown optimized for AI agents
+
+## MD export example
+
+    ## [LOG-003] 電話 / 2026-07-09
+
+    - 連絡者: 山田さん
+    - 優先度: 高
+    - ステータス: 未対応
+    - 件名: LPフォームが送信できない
+    - 詳細: iPhoneで確認。来週中に対応希望。
+    - 対応指示: モバイルのフォーム送信バグを修正する
+
+## Part of HX Series / WAHXスタック
+
+HXFE (forms) → HXMD (log storage) → AI (your choice)
