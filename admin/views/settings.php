@@ -140,6 +140,41 @@ $hxmd_settings_saved = ! empty( $_GET['saved'] );
   <?php endif; ?>
 
   <hr>
+  <h2>HXRV連携</h2>
+  <?php if ( defined( 'HXRV_VERSION' ) ) : ?>
+    <p class="description">HXRV v<?php echo esc_html( HXRV_VERSION ); ?> を検出しました。ビジュアルレビューのピンコメントを自動的にログとして取り込めます（HXRV v1.0.1以降が必要）。</p>
+    <table class="form-table">
+      <tr>
+        <th>自動取り込み</th>
+        <td>
+          <label>
+            <input type="checkbox" name="hxrv_enabled" value="1" form="hxmd-settings-form"
+              <?php checked( get_option( 'hxmd_hxrv_enabled', '0' ), '1' ); ?>>
+            HXRVのピンコメント作成をHXMDログとして自動保存する
+          </label>
+          <p class="description">ピン本体のみ取り込みます（スレッドへの返信は対象外）。コメント内容は対応指示にも反映されます。</p>
+        </td>
+      </tr>
+      <tr>
+        <th><label for="hxrv_log_type">取り込み時の種別</label></th>
+        <td>
+          <select id="hxrv_log_type" name="hxrv_log_type" form="hxmd-settings-form">
+            <?php
+            $hxmd_hxrv_current = get_option( 'hxmd_hxrv_log_type', 'memo' );
+            foreach ( $types as $hxmd_t2_key => $hxmd_t2_label ) : ?>
+              <option value="<?php echo esc_attr( $hxmd_t2_key ); ?>" <?php selected( $hxmd_hxrv_current, $hxmd_t2_key ); ?>>
+                <?php echo esc_html( $hxmd_t2_label ); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </td>
+      </tr>
+    </table>
+  <?php else : ?>
+    <p class="description">HXRV（AI-Ready Visual Review）がインストールされていません。HXRV v1.0.1以降を有効化するとピンコメントの自動取り込みが利用できます。</p>
+  <?php endif; ?>
+
+  <hr>
   <h2>PHPフィルターでの拡張</h2>
   <p class="description">functions.php でも種別を追加できます。</p>
   <pre class="hxmd-pre" style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:6px;">add_filter( 'hxmd_log_types', function( $types ) {

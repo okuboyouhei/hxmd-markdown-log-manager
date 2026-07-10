@@ -122,6 +122,8 @@ $hxmd_filter  = [
             <span class="hxmd-badge hxmd-type-<?php echo esc_attr( $hxmd_log['log_type'] ); ?>"><?php echo esc_html( $hxmd_type_label ); ?></span>
             <?php if ( 'hxfe' === ( $hxmd_log['source'] ?? 'manual' ) ) : ?>
               <span class="hxmd-badge hxmd-source-hxfe">HXFE</span>
+            <?php elseif ( 'hxrv' === ( $hxmd_log['source'] ?? 'manual' ) ) : ?>
+              <span class="hxmd-badge hxmd-source-hxrv">HXRV</span>
             <?php endif; ?>
           </td>
           <td><?php echo esc_html( HXMD_Categories::get_label( $hxmd_log['category'] ?? '' ) ); ?></td>
