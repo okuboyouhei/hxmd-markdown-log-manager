@@ -22,9 +22,13 @@ define( 'HXMD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 require_once HXMD_PLUGIN_DIR . 'includes/class-hxmd-db.php';
 require_once HXMD_PLUGIN_DIR . 'includes/class-hxmd-log-types.php';
+require_once HXMD_PLUGIN_DIR . 'includes/class-hxmd-categories.php';
 require_once HXMD_PLUGIN_DIR . 'includes/class-hxmd-markdown.php';
 require_once HXMD_PLUGIN_DIR . 'includes/class-hxmd-admin.php';
+require_once HXMD_PLUGIN_DIR . 'includes/class-hxmd-hxfe-bridge.php';
 
 register_activation_hook( __FILE__, [ 'HXMD_DB', 'create_table' ] );
 
 add_action( 'init', [ 'HXMD_Admin', 'init' ] );
+add_action( 'admin_init', [ 'HXMD_DB', 'maybe_upgrade' ] );
+HXMD_HXFE_Bridge::init();

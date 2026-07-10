@@ -6,6 +6,7 @@ $hxmd_saved   = ! empty( $_GET['saved'] );
 $hxmd_deleted = ! empty( $_GET['deleted'] );
 $hxmd_filter  = [
 	'log_type'  => sanitize_text_field( wp_unslash( $_GET['log_type']  ?? '' ) ),
+	'category'  => sanitize_text_field( wp_unslash( $_GET['category']  ?? '' ) ),
 	'priority'  => sanitize_text_field( wp_unslash( $_GET['priority']  ?? '' ) ),
 	'status'    => sanitize_text_field( wp_unslash( $_GET['status']    ?? '' ) ),
 	'date_from' => sanitize_text_field( wp_unslash( $_GET['date_from'] ?? '' ) ),
@@ -40,6 +41,17 @@ $hxmd_filter  = [
           </option>
         <?php endforeach; ?>
       </select>
+      <?php $hxmd_categories = HXMD_Categories::get_categories(); ?>
+      <?php if ( ! empty( $hxmd_categories ) ) : ?>
+      <select name="category">
+        <option value="">すべてのカテゴリ</option>
+        <?php foreach ( $hxmd_categories as $hxmd_cat_key => $hxmd_cat_label ) : ?>
+          <option value="<?php echo esc_attr( $hxmd_cat_key ); ?>" <?php selected( $hxmd_filter['category'], $hxmd_cat_key ); ?>>
+            <?php echo esc_html( $hxmd_cat_label ); ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+      <?php endif; ?>
       <select name="priority">
         <option value="">すべての優先度</option>
         <option value="high"   <?php selected( $hxmd_filter['priority'], 'high' ); ?>>高</option>
@@ -73,12 +85,15 @@ $hxmd_filter  = [
         <th class="hxmd-col-check"><input type="checkbox" @change="toggleAll($event)"></th>
         <?php
         $hxmd_cols = [
-          'id'       => '#',
-          'log_type' => '種別',
-          'log_date' => '日付',
-          'subject'  => '件名',
-          'priority' => '優先度',
-          'status'   => 'ステータス',
+          'id'         => '#',
+          'log_type'   => '種別',
+          'category'   => 'カテゴリ',
+          'log_date'   => '日付',
+          'subject'    => '件名',
+          'due_date'   => '期限',
+          'priority'   => '優先度',
+          'status'     => 'ステータス',
+          'updated_at' => '更新日時',
         ];
         foreach ( $hxmd_cols as $hxmd_col => $hxmd_col_label ) :
           $hxmd_next_order = ( $hxmd_filter['orderby'] === $hxmd_col && $hxmd_filter['order'] === 'DESC' ) ? 'ASC' : 'DESC';
@@ -92,7 +107,7 @@ $hxmd_filter  = [
     </thead>
     <tbody>
       <?php if ( empty( $logs ) ) : ?>
-        <tr><td colspan="8" class="hxmd-empty">ログがありません。</td></tr>
+        <tr><td colspan="11" class="hxmd-empty">ログがありません。</td></tr>
       <?php else : ?>
         <?php foreach ( $logs as $hxmd_log ) :
           $hxmd_type_label     = HXMD_Log_Types::get_label( $hxmd_log['log_type'] );
@@ -103,11 +118,27 @@ $hxmd_filter  = [
         <tr>
           <td><input type="checkbox" :value="<?php echo (int) $hxmd_log['id']; ?>" x-model="selected"></td>
           <td><?php echo (int) $hxmd_log['id']; ?></td>
-          <td><span class="hxmd-badge hxmd-type-<?php echo esc_attr( $hxmd_log['log_type'] ); ?>"><?php echo esc_html( $hxmd_type_label ); ?></span></td>
+          <td>
+            <span class="hxmd-badge hxmd-type-<?php echo esc_attr( $hxmd_log['log_type'] ); ?>"><?php echo esc_html( $hxmd_type_label ); ?></span>
+            <?php if ( 'hxfe' === ( $hxmd_log['source'] ?? 'manual' ) ) : ?>
+              <span class="hxmd-badge hxmd-source-hxfe">HXFE</span>
+            <?php endif; ?>
+          </td>
+          <td><?php echo esc_html( HXMD_Categories::get_label( $hxmd_log['category'] ?? '' ) ); ?></td>
           <td><?php echo esc_html( $hxmd_log['log_date'] ); ?></td>
           <td><a href="<?php echo esc_url( $hxmd_edit_url ); ?>"><?php echo esc_html( $hxmd_log['subject'] ); ?></a></td>
+          <td>
+            <?php
+            $hxmd_due = $hxmd_log['due_date'] ?? '';
+            if ( $hxmd_due ) :
+              $hxmd_is_overdue = ( $hxmd_due < current_time( 'Y-m-d' ) && 'done' !== $hxmd_log['status'] );
+            ?>
+              <span class="<?php echo $hxmd_is_overdue ? 'hxmd-overdue' : ''; ?>"><?php echo esc_html( $hxmd_due ); ?></span>
+            <?php endif; ?>
+          </td>
           <td><span class="hxmd-priority hxmd-priority-<?php echo esc_attr( $hxmd_log['priority'] ); ?>"><?php echo esc_html( $hxmd_priority_label ); ?></span></td>
           <td><span class="hxmd-status hxmd-status-<?php echo esc_attr( $hxmd_log['status'] ); ?>"><?php echo esc_html( $hxmd_status_label ); ?></span></td>
+          <td class="hxmd-updated"><?php echo esc_html( mysql2date( 'Y-m-d H:i', $hxmd_log['updated_at'] ) ); ?></td>
           <td>
             <button class="button button-small" @click="copyOneMd(<?php echo (int) $hxmd_log['id']; ?>, $event)">MDコピー</button>
             <a href="<?php echo esc_url( $hxmd_edit_url ); ?>" class="button button-small">編集</a>
@@ -119,40 +150,3 @@ $hxmd_filter  = [
   </table>
 </div>
 
-<script>
-function hxmdList() {
-  return {
-    selected: [],
-    copied: false,
-    toggleAll(e) {
-      const checkboxes = document.querySelectorAll('.hxmd-table tbody input[type="checkbox"]');
-      this.selected = e.target.checked ? [...checkboxes].map(c => parseInt(c.value)) : [];
-    },
-    async copyOneMd(id, e) {
-      const btn = e.target;
-      const md  = await this.fetchMd([id]);
-      if (!md) return;
-      await hxmdCopyText(md);
-      const orig = btn.textContent;
-      btn.textContent = 'コピーしました！';
-      setTimeout(() => btn.textContent = orig, 2000);
-    },
-    async bulkCopyMd() {
-      const md = await this.fetchMd(this.selected);
-      if (!md) return;
-      await hxmdCopyText(md);
-      this.copied = true;
-      setTimeout(() => this.copied = false, 2000);
-    },
-    async fetchMd(ids) {
-      const body = new FormData();
-      body.append('action', 'hxmd_get_md');
-      body.append('_ajax_nonce', hxmdData.nonce);
-      ids.forEach(id => body.append('ids[]', id));
-      const res  = await fetch(hxmdData.ajaxUrl, { method: 'POST', body });
-      const json = await res.json();
-      return json.success ? json.data.md : null;
-    },
-  };
-}
-</script>

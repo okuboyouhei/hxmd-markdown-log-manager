@@ -43,12 +43,12 @@ class HXMD_Admin {
 			HXMD_PLUGIN_URL . 'admin/assets/hxmd-admin.js',
 			[],
 			HXMD_VERSION,
-			true
+			[ 'strategy' => 'defer' ]
 		);
 		wp_enqueue_script(
 			'hxmd-alpine',
 			HXMD_PLUGIN_URL . 'assets/alpine.min.js',
-			[],
+			[ 'hxmd-admin' ],
 			'3.15.12',
 			[ 'strategy' => 'defer' ]
 		);
@@ -65,9 +65,27 @@ class HXMD_Admin {
 			[],
 			HXMD_VERSION
 		);
+		// 設定画面用の保存済みデータ
+		$custom_types = [];
+		$saved_types  = get_option( 'hxmd_custom_types', [] );
+		if ( is_array( $saved_types ) ) {
+			foreach ( $saved_types as $k => $v ) {
+				$custom_types[] = [ 'key' => $k, 'label' => $v ];
+			}
+		}
+		$categories       = [];
+		$saved_categories = get_option( 'hxmd_categories', [] );
+		if ( is_array( $saved_categories ) ) {
+			foreach ( $saved_categories as $k => $v ) {
+				$categories[] = [ 'key' => $k, 'label' => $v ];
+			}
+		}
+
 		wp_localize_script( 'hxmd-admin', 'hxmdData', [
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'hxmd_nonce' ),
+			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+			'nonce'       => wp_create_nonce( 'hxmd_nonce' ),
+			'customTypes' => $custom_types,
+			'categories'  => $categories,
 		] );
 	}
 
@@ -76,6 +94,7 @@ class HXMD_Admin {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- GETフィルターフォームのためnonce不要
 		$args = [
 			'log_type'  => sanitize_text_field( wp_unslash( $_GET['log_type']  ?? '' ) ),
+			'category'  => sanitize_text_field( wp_unslash( $_GET['category']  ?? '' ) ),
 			'priority'  => sanitize_text_field( wp_unslash( $_GET['priority']  ?? '' ) ),
 			'status'    => sanitize_text_field( wp_unslash( $_GET['status']    ?? '' ) ),
 			'date_from' => sanitize_text_field( wp_unslash( $_GET['date_from'] ?? '' ) ),
@@ -131,6 +150,15 @@ class HXMD_Admin {
 
 		$types = isset( $_POST['custom_types'] ) ? wp_unslash( $_POST['custom_types'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_custom_types() 内でサニタイズ済み
 		HXMD_Log_Types::save_custom_types( is_array( $types ) ? $types : [] );
+
+		$categories = isset( $_POST['categories'] ) ? wp_unslash( $_POST['categories'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- save_categories() 内でサニタイズ済み
+		HXMD_Categories::save_categories( is_array( $categories ) ? $categories : [] );
+
+		// HXFE連携設定
+		update_option( 'hxmd_hxfe_enabled', isset( $_POST['hxfe_enabled'] ) ? '1' : '0' );
+		update_option( 'hxmd_hxfe_forms', sanitize_text_field( wp_unslash( $_POST['hxfe_forms'] ?? '' ) ) );
+		update_option( 'hxmd_hxfe_log_type', sanitize_key( wp_unslash( $_POST['hxfe_log_type'] ?? 'email' ) ) );
+
 		wp_safe_redirect( admin_url( 'admin.php?page=hxmd-settings&saved=1' ) );
 		exit;
 	}

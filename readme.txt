@@ -53,7 +53,7 @@ No. HXMD does not include any AI. Copy the exported Markdown and paste it into a
 
 = Can HXMD integrate with HXFE (HX Form Engine)? =
 
-Integration is planned for v1.1.0. Form submissions will be automatically saved as HXMD logs.
+Yes. With HXFE v1.4.5+, enable auto-capture in HXMD > Settings. Form submissions are automatically saved as HXMD logs.
 
 = Can I add custom log types? =
 
@@ -68,9 +68,17 @@ Yes. Go to HXMD > Settings to add, edit, or delete custom types. You can also us
 == Changelog ==
 
 = 1.0.0 =
-* 初回リリース
+* Initial release
+* Log management with types, categories, priorities, statuses, start/due dates
+* Sortable, filterable log list with overdue highlighting
+* MD export (single & bulk copy) optimized for AI agents
+* MD toolbar: bold, strikethrough, bullet/numbered lists
+* Smart paste: Excel/Sheets tables and Google Docs rich text convert to Markdown
+* Related URLs field for Backlog/GitHub issue linking
+* HXFE integration: auto-capture form submissions (requires HXFE v1.4.5+)
+* DB schema auto-upgrade routine
 
 == Upgrade Notice ==
 
 = 1.0.0 =
-初回リリースです。
+Initial release.

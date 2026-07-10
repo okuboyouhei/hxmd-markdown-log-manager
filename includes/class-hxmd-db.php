@@ -35,25 +35,42 @@ class HXMD_DB {
 		$sql = "CREATE TABLE {$table} (
 			id           INT          NOT NULL AUTO_INCREMENT,
 			log_type     VARCHAR(50)  NOT NULL DEFAULT 'memo',
+			category     VARCHAR(100) NOT NULL DEFAULT '',
 			log_date     DATE         NOT NULL,
+			start_date   DATE         DEFAULT NULL,
+			due_date     DATE         DEFAULT NULL,
 			contact_name VARCHAR(255) NOT NULL DEFAULT '',
 			subject      VARCHAR(255) NOT NULL DEFAULT '',
 			body         TEXT         NOT NULL DEFAULT '',
 			priority     VARCHAR(20)  NOT NULL DEFAULT 'medium',
 			instruction  TEXT         NOT NULL DEFAULT '',
+			links        TEXT         NOT NULL DEFAULT '',
 			status       VARCHAR(20)  NOT NULL DEFAULT 'open',
 			source       VARCHAR(50)  NOT NULL DEFAULT 'manual',
 			created_at   DATETIME     NOT NULL,
 			updated_at   DATETIME     NOT NULL,
 			PRIMARY KEY (id),
 			KEY log_type (log_type),
+			KEY category (category),
 			KEY log_date (log_date),
+			KEY due_date (due_date),
 			KEY priority (priority),
 			KEY status (status)
 		) {$charset};";
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
+		update_option( 'hxmd_db_version', HXMD_VERSION );
+	}
+
+	/**
+	 * DBスキーマのアップグレード。
+	 * バージョンが変わっていたら dbDelta を再実行してカラム追加を反映する。
+	 */
+	public static function maybe_upgrade(): void {
+		if ( get_option( 'hxmd_db_version' ) !== HXMD_VERSION ) {
+			self::create_table();
+		}
 	}
 
 	public static function drop_table(): void {
@@ -68,6 +85,7 @@ class HXMD_DB {
 
 		$defaults = [
 			'log_type'  => '',
+			'category'  => '',
 			'priority'  => '',
 			'status'    => '',
 			'date_from' => '',
@@ -84,6 +102,10 @@ class HXMD_DB {
 		if ( $args['log_type'] ) {
 			$where[]  = 'log_type = %s';
 			$params[] = $args['log_type'];
+		}
+		if ( $args['category'] ) {
+			$where[]  = 'category = %s';
+			$params[] = $args['category'];
 		}
 		if ( $args['priority'] ) {
 			$where[]  = 'priority = %s';
@@ -109,7 +131,7 @@ class HXMD_DB {
 			$params[] = $like;
 		}
 
-		$allowed_orderby = [ 'log_date', 'priority', 'status', 'log_type', 'id' ];
+		$allowed_orderby = [ 'log_date', 'start_date', 'due_date', 'priority', 'status', 'log_type', 'category', 'id', 'updated_at' ];
 		$orderby = in_array( $args['orderby'], $allowed_orderby, true )
 			? $args['orderby'] : 'log_date';
 		$order = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
@@ -143,14 +165,21 @@ class HXMD_DB {
 		$table = self::table();
 		$now   = current_time( 'mysql' );
 
+		$start_date = sanitize_text_field( $data['start_date'] ?? '' );
+		$due_date   = sanitize_text_field( $data['due_date']   ?? '' );
+
 		$row = [
 			'log_type'     => sanitize_text_field( $data['log_type']        ?? 'memo' ),
+			'category'     => sanitize_text_field( $data['category']        ?? '' ),
 			'log_date'     => sanitize_text_field( $data['log_date']        ?? $now ),
+			'start_date'   => '' !== $start_date ? $start_date : null,
+			'due_date'     => '' !== $due_date ? $due_date : null,
 			'contact_name' => sanitize_text_field( $data['contact_name']    ?? '' ),
 			'subject'      => sanitize_text_field( $data['subject']         ?? '' ),
 			'body'         => sanitize_textarea_field( $data['body']        ?? '' ),
 			'priority'     => sanitize_text_field( $data['priority']        ?? 'medium' ),
 			'instruction'  => sanitize_textarea_field( $data['instruction'] ?? '' ),
+			'links'        => sanitize_textarea_field( $data['links']       ?? '' ),
 			'status'       => sanitize_text_field( $data['status']          ?? 'open' ),
 			'source'       => sanitize_text_field( $data['source']          ?? 'manual' ),
 			'updated_at'   => $now,

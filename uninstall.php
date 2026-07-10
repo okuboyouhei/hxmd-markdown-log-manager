@@ -12,3 +12,8 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-hxmd-db.php';
 
 HXMD_DB::drop_table();
 delete_option( 'hxmd_custom_types' );
+delete_option( 'hxmd_categories' );
+delete_option( 'hxmd_db_version' );
+delete_option( 'hxmd_hxfe_enabled' );
+delete_option( 'hxmd_hxfe_forms' );
+delete_option( 'hxmd_hxfe_log_type' );

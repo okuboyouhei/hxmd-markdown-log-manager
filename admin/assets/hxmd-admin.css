@@ -26,6 +26,9 @@
 }
 
 .hxmd-table .hxmd-col-check { width: 36px; }
+.hxmd-updated { color: #777; font-size: 12px; white-space: nowrap; }
+.hxmd-overdue { color: #dc2626; font-weight: 600; }
+.hxmd-date-sep { margin: 0 4px; color: #777; }
 .hxmd-empty { text-align: center; color: #777; padding: 32px !important; }
 
 .hxmd-badge {
@@ -42,6 +45,7 @@
 .hxmd-type-meeting { background: #fef9c3; color: #854d0e; }
 .hxmd-type-memo    { background: #f3e8ff; color: #6b21a8; }
 .hxmd-badge-custom { background: #0F6E56; color: #fff; }
+.hxmd-source-hxfe  { background: #26215C; color: #fff; }
 
 .hxmd-priority         { font-weight: 600; }
 .hxmd-priority-high    { color: #dc2626; }
@@ -83,6 +87,41 @@
 .hxmd-edit-form .form-table th { width: 160px; }
 .required { color: #dc2626; }
 
-.hxmd-settings-table       { max-width: 800px; }
-.hxmd-row-default td       { color: #777; }
-.hxmd-settings-table input { width: 100%; }
+.hxmd-textarea-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.hxmd-textarea-toolbar .description { font-size: 12px; }
+
+.hxmd-settings-table          { max-width: 800px; }
+.hxmd-settings-table th,
+.hxmd-settings-table td       {
+  vertical-align: middle;
+  padding: 10px 12px;
+}
+.hxmd-row-default td          { color: #777; }
+.hxmd-settings-table input[type="text"] {
+  width: 100%;
+  max-width: 240px;
+  height: 32px;
+  margin: 0;
+  font-size: 13px;
+}
+.hxmd-settings-table .hxmd-badge {
+  vertical-align: middle;
+}
+.hxmd-settings-table .button-link-delete {
+  padding: 0;
+  height: auto;
+  line-height: 1.4;
+}
+.hxmd-settings-table code {
+  font-size: 12px;
+  padding: 2px 6px;
+}
+.hxmd-settings-table .hxmd-add-row td {
+  padding: 12px;
+  background: #fafafa;
+}
