@@ -170,3 +170,27 @@ hxmd-markdown-log-manager/
 | HXSE | 情報検索 | hxse-code-first-search |
 | HXRV | フィードバック収集 | hxrv-ai-ready-visual-review |
 | HXMD | ログ構造化保存 | hxmd-markdown-log-manager |
+
+## HXRV連携（class-hxmd-hxrv-bridge.php）v1.1.0〜
+
+- HXRV v1.0.1以降の `hxrv_after_comment_created` アクション（`$id, $comment`）を購読
+- `plugins_loaded` で `HXRV_VERSION` 定義チェック後に登録（HXRV無しでも安全）
+- **ピン本体のみ取り込む**。スレッド返信（`parent_id` あり）は除外
+- 設定: `hxmd_hxrv_enabled`（'0'/'1'）、`hxmd_hxrv_log_type`（デフォルト 'memo'）
+- マッピング:
+  - content → body（＋対象要素セレクタを追記）**および instruction**（ピンは修正指示そのものなので対応指示にもコピー）
+  - content先頭行（40字まで）→ subject
+  - page_url → links（「対象ページ」ラベル付き）
+  - author_name → contact_name
+  - source = 'hxrv'（一覧で緑バッジ #0F6E56）
+
+## HX連携の共通パターン
+
+HXFE / HXRV とも同じBridge設計を踏襲している。新しいHXプラグインと連携する場合もこのパターンに従うこと:
+
+1. 相手プラグイン側に `{prefix}_after_{event}` アクションフックを追加（存在しなければ）
+2. HXMDに `class-hxmd-{plugin}-bridge.php` を作成
+3. `plugins_loaded` で相手のVERSION定数チェック → フック購読
+4. 設定画面に有効化チェックボックス + 種別選択を追加
+5. `source` カラムに識別子、一覧にブランド色バッジ
+6. uninstall.php にオプション削除を追加
