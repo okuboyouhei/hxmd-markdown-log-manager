@@ -194,3 +194,48 @@ HXFE / HXRV とも同じBridge設計を踏襲している。新しいHXプラグ
 4. 設定画面に有効化チェックボックス + 種別選択を追加
 5. `source` カラムに識別子、一覧にブランド色バッジ
 6. uninstall.php にオプション削除を追加
+
+## 投稿エクスポート（class-hxmd-post-export.php）v1.2.0〜
+
+### 概要
+
+投稿・固定ページ・カスタム投稿タイプを、AI可読な構造化MDに変換してコピーできる機能。「この記事をリライトして」「サイトの全お知らせをNotebookLMに」という用途。hxmd_logsテーブルとは無関係の独立機能（投稿をログとして取り込まない設計判断。データモデルを濁さない）。
+
+### 入口は2つ
+
+1. **HXMDメニュー「投稿エクスポート」**（admin.php?page=hxmd-post-export）— 投稿タイプセレクト + 検索 + 一覧から選択してMDコピー（1件 / 複数一括）
+2. **行アクション「HXMD: MD」** — 全公開投稿タイプの一覧画面（edit.php）に表示。リンク先はエクスポート画面（該当投稿タイプ + タイトル検索済み状態）。post_row_actions / page_row_actions フィルターで追加
+
+### 対象投稿タイプ
+
+get_post_types( [ 'public' => true ] ) で動的取得（attachmentを除く）。カスタム投稿タイプは登録されていれば自動で対象になる。追加コード不要。
+
+### MDフォーマット（render_post）
+
+    # 投稿タイトル
+
+    - URL: {permalink}
+    - 投稿タイプ: {ラベル表示。内部名ではない}
+    - 公開日: Y-m-d
+    - 更新日: Y-m-d H:i
+    - {タクソノミーラベル}: {ターム名, ...}   ← 全公開タクソノミーを自動列挙
+    - ステータス: {日本語ラベル}
+
+    ---
+
+    本文MD
+
+複数件は render_bulk が「# HXMD Post Export」+ Generated: + Total: ヘッダー付きで結合。
+
+### HTML→MD変換（サーバーサイド）
+
+- apply_filters( 'the_content', ... ) でレンダリング後HTMLを取得 → DOMDocumentで変換。**Gutenbergブロックはレンダリング後を変換するのでブロック種別に依存しない**
+- この行はPlugin Checkの NonPrefixedHooknameFound に誤検知される（コアフィルターの適用であって新規フック定義ではない）。理由コメント付きphpcs:ignoreで抑制済み。**削除しないこと**
+- DOMDocumentのUTF-8対策: <?xml encoding="UTF-8"?> プリアンブル + ルートdivラップ方式
+- 対応タグ: h1-h6 / p / strong / b / em / i / s / del / a / img / code / pre / ul / ol（ネスト対応）/ table / blockquote / hr / br / figure / figcaption
+- v1.1.0のJS版変換（hxmdHtmlToMd: Googleドキュメント貼り付け用）とは**別実装**。JS版はクリップボードHTML、PHP版は投稿レンダリングHTMLが対象。仕様変更時は両方の同期を検討すること
+
+### Ajax
+
+- Action: hxmd_get_post_md（POST、nonce hxmd_nonce + manage_options）
+- Params: ids[]。1件なら render_post、複数なら render_bulk
