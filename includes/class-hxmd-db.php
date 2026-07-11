@@ -200,6 +200,27 @@ class HXMD_DB {
 		return (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
 	}
 
+	/**
+	 * 複数ログの一括削除。
+	 *
+	 * @param int[] $ids ログIDの配列
+	 * @return int 削除件数
+	 */
+	public static function delete_logs( array $ids ): int {
+		global $wpdb;
+		$ids = array_filter( array_map( 'intval', $ids ) );
+		if ( empty( $ids ) ) {
+			return 0;
+		}
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare(
+				'DELETE FROM ' . self::table() . " WHERE id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- テーブル名はprefix由来、プレースホルダは%dのみで構築
+				...$ids
+			)
+		);
+	}
+
 	public static function get_logs_by_ids( array $ids ): array {
 		if ( empty( $ids ) ) { return []; }
 		global $wpdb;

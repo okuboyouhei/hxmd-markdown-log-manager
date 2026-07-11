@@ -13,6 +13,7 @@ class HXMD_Admin {
 		add_action( 'admin_enqueue_scripts',         [ __CLASS__, 'enqueue_assets' ] );
 		add_action( 'admin_post_hxmd_save_log',      [ __CLASS__, 'handle_save' ] );
 		add_action( 'admin_post_hxmd_delete_log',    [ __CLASS__, 'handle_delete' ] );
+		add_action( 'admin_post_hxmd_bulk_delete',   [ __CLASS__, 'handle_bulk_delete' ] );
 		add_action( 'admin_post_hxmd_save_settings', [ __CLASS__, 'handle_save_settings' ] );
 		add_action( 'wp_ajax_hxmd_get_md',           [ __CLASS__, 'ajax_get_md' ] );
 		add_action( 'wp_ajax_hxmd_get_post_md',      [ __CLASS__, 'ajax_get_post_md' ] );
@@ -178,6 +179,16 @@ class HXMD_Admin {
 		$id = intval( $_POST['id'] ?? 0 );
 		HXMD_DB::delete_log( $id );
 		wp_safe_redirect( admin_url( 'admin.php?page=hxmd&deleted=1' ) );
+		exit;
+	}
+
+	public static function handle_bulk_delete(): void {
+		check_admin_referer( 'hxmd_bulk_delete' );
+		if ( ! current_user_can( 'manage_options' ) ) { wp_die( 'Unauthorized' ); }
+
+		$ids = array_filter( array_map( 'intval', (array) ( $_POST['ids'] ?? [] ) ) );
+		$deleted = HXMD_DB::delete_logs( $ids );
+		wp_safe_redirect( admin_url( 'admin.php?page=hxmd&deleted=' . $deleted ) );
 		exit;
 	}
 

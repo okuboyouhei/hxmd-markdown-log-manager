@@ -4,7 +4,7 @@ Tags:              markdown, log, inquiry, ai-ready, htmx
 Requires at least: 6.4
 Tested up to:      7.0
 Requires PHP:      8.1
-Stable tag:        1.2.0
+Stable tag:        1.3.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,12 @@ Yes. Go to HXMD > Settings to add, edit, or delete custom types. You can also us
 3. MDプレビュー
 
 == Changelog ==
+
+= 1.3.0 =
+* Added: Bulk delete — select multiple logs and delete them at once (confirmation dialog, nonce-protected)
+
+= 1.2.1 =
+* Fixed: Post Export page failed to load ("Cannot load hxmd-post-export") when opened from the row action — the reserved `post_type` query parameter broke WP admin menu resolution. Replaced with plugin-specific parameter names
 
 = 1.2.0 =
 * Added: Post Export — select posts/pages and copy them as structured Markdown (title, URL, dates, categories, tags + full body converted from HTML to MD). Ideal for NotebookLM ingestion or AI-assisted rewriting

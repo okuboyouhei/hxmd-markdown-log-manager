@@ -72,10 +72,19 @@ $hxmd_filter  = [
     </div>
   </form>
 
-  <!-- まとめてMDコピー -->
+  <!-- まとめてMDコピー / まとめて削除 -->
   <div class="hxmd-bulk-actions" x-show="selected.length > 0">
     <span x-text="selected.length + ' 件選択中'"></span>
     <button class="button button-primary" @click="bulkCopyMd()" x-text="copied ? 'コピーしました！' : 'まとめてMDコピー'"></button>
+    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+          class="hxmd-bulk-delete-form" style="display:inline;">
+      <input type="hidden" name="action" value="hxmd_bulk_delete">
+      <?php wp_nonce_field( 'hxmd_bulk_delete' ); ?>
+      <template x-for="id in selected" :key="'del' + id">
+        <input type="hidden" name="ids[]" :value="id">
+      </template>
+      <button type="submit" class="button hxmd-bulk-delete-btn">まとめて削除</button>
+    </form>
   </div>
 
   <!-- 一覧テーブル -->

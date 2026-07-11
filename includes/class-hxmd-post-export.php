@@ -28,11 +28,14 @@ class HXMD_Post_Export {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return $actions;
 		}
+		// 注意: 'post_type' はWP管理画面の予約パラメータ（$typenowに影響し
+		// 親メニュー解決が edit.php 側に化けて "Cannot load" になる）ため、
+		// 独自名 hxmd_pt / hxmd_s を使う。
 		$url = add_query_arg(
 			[
-				'page'      => 'hxmd-post-export',
-				'post_type' => $post->post_type,
-				's'         => rawurlencode( $post->post_title ),
+				'page'    => 'hxmd-post-export',
+				'hxmd_pt' => $post->post_type,
+				'hxmd_s'  => rawurlencode( $post->post_title ),
 			],
 			admin_url( 'admin.php' )
 		);

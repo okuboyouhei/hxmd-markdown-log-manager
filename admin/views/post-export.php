@@ -2,8 +2,8 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- GET絞り込みフォームのためnonce不要
-$hxmd_pe_type   = sanitize_key( wp_unslash( $_GET['post_type'] ?? 'post' ) );
-$hxmd_pe_search = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
+$hxmd_pe_type   = sanitize_key( wp_unslash( $_GET['hxmd_pt'] ?? 'post' ) );
+$hxmd_pe_search = sanitize_text_field( wp_unslash( $_GET['hxmd_s'] ?? '' ) );
 // phpcs:enable
 
 $hxmd_pe_types = get_post_types( [ 'public' => true ], 'objects' );
@@ -27,14 +27,14 @@ $hxmd_pe_query = new WP_Query( [
   <form method="get" action="" class="hxmd-filter-form">
     <input type="hidden" name="page" value="hxmd-post-export">
     <div class="hxmd-filter-row">
-      <select name="post_type">
+      <select name="hxmd_pt">
         <?php foreach ( $hxmd_pe_types as $hxmd_pt_key => $hxmd_pt_obj ) : ?>
           <option value="<?php echo esc_attr( $hxmd_pt_key ); ?>" <?php selected( $hxmd_pe_type, $hxmd_pt_key ); ?>>
             <?php echo esc_html( $hxmd_pt_obj->labels->name ); ?>
           </option>
         <?php endforeach; ?>
       </select>
-      <input type="search" name="s" value="<?php echo esc_attr( $hxmd_pe_search ); ?>" placeholder="タイトル・本文を検索">
+      <input type="search" name="hxmd_s" value="<?php echo esc_attr( $hxmd_pe_search ); ?>" placeholder="タイトル・本文を検索">
       <button type="submit" class="button">絞り込む</button>
     </div>
   </form>

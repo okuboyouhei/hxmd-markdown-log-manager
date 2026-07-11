@@ -453,6 +453,16 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			}
 		} );
 	}
+
+	const bulkDeleteForm = document.querySelector( '.hxmd-bulk-delete-form' );
+	if ( bulkDeleteForm ) {
+		bulkDeleteForm.addEventListener( 'submit', function ( e ) {
+			const count = bulkDeleteForm.querySelectorAll( 'input[name="ids[]"]' ).length;
+			if ( ! window.confirm( count + '件のログを削除しますか？この操作は取り消せません。' ) ) {
+				e.preventDefault();
+			}
+		} );
+	}
 } );
 
 /**
