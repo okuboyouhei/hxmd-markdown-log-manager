@@ -4,7 +4,7 @@ Tags:              markdown, log, inquiry, ai-ready, htmx
 Requires at least: 6.4
 Tested up to:      7.0
 Requires PHP:      8.1
-Stable tag:        1.1.0
+Stable tag:        1.2.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,10 @@ Yes. Go to HXMD > Settings to add, edit, or delete custom types. You can also us
 3. MDプレビュー
 
 == Changelog ==
+
+= 1.2.0 =
+* Added: Post Export — select posts/pages and copy them as structured Markdown (title, URL, dates, categories, tags + full body converted from HTML to MD). Ideal for NotebookLM ingestion or AI-assisted rewriting
+* Added: Server-side HTML-to-Markdown converter (headings, bold, strikethrough, italic, nested lists, tables, links, images, blockquotes, code blocks)
 
 = 1.1.0 =
 * Added: HXRV integration — automatically capture visual review pin comments as logs (requires HXRV v1.0.1+)

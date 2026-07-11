@@ -454,3 +454,42 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		} );
 	}
 } );
+
+/**
+ * Alpine コンポーネント: 投稿エクスポート
+ */
+function hxmdPostExport() {
+	return {
+		selected: [],
+		copied: false,
+		toggleAll( e ) {
+			const checkboxes = document.querySelectorAll( '.hxmd-table tbody input[type="checkbox"]' );
+			this.selected = e.target.checked ? [ ...checkboxes ].map( c => parseInt( c.value ) ) : [];
+		},
+		async copyOne( id, e ) {
+			const btn = e.target;
+			const md  = await this.fetchPostMd( [ id ] );
+			if ( ! md ) return;
+			await hxmdCopyText( md );
+			const orig = btn.textContent;
+			btn.textContent = 'コピーしました！';
+			setTimeout( () => btn.textContent = orig, 2000 );
+		},
+		async bulkCopy() {
+			const md = await this.fetchPostMd( this.selected );
+			if ( ! md ) return;
+			await hxmdCopyText( md );
+			this.copied = true;
+			setTimeout( () => this.copied = false, 2000 );
+		},
+		async fetchPostMd( ids ) {
+			const body = new FormData();
+			body.append( 'action', 'hxmd_get_post_md' );
+			body.append( '_ajax_nonce', hxmdData.nonce );
+			ids.forEach( id => body.append( 'ids[]', id ) );
+			const res  = await fetch( hxmdData.ajaxUrl, { method: 'POST', body } );
+			const json = await res.json();
+			return json.success ? json.data.md : null;
+		},
+	};
+}

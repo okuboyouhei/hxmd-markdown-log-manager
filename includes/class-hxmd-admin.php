@@ -15,6 +15,7 @@ class HXMD_Admin {
 		add_action( 'admin_post_hxmd_delete_log',    [ __CLASS__, 'handle_delete' ] );
 		add_action( 'admin_post_hxmd_save_settings', [ __CLASS__, 'handle_save_settings' ] );
 		add_action( 'wp_ajax_hxmd_get_md',           [ __CLASS__, 'ajax_get_md' ] );
+		add_action( 'wp_ajax_hxmd_get_post_md',      [ __CLASS__, 'ajax_get_post_md' ] );
 	}
 
 	public static function register_menu(): void {
@@ -29,11 +30,12 @@ class HXMD_Admin {
 		);
 		add_submenu_page( 'hxmd', 'ログ一覧', 'ログ一覧', 'manage_options', 'hxmd',          [ __CLASS__, 'page_list' ] );
 		add_submenu_page( 'hxmd', '新規ログ', '新規ログ', 'manage_options', 'hxmd-new',      [ __CLASS__, 'page_edit' ] );
+		add_submenu_page( 'hxmd', '投稿エクスポート', '投稿エクスポート', 'manage_options', 'hxmd-post-export', [ __CLASS__, 'page_post_export' ] );
 		add_submenu_page( 'hxmd', '設定',     '設定',     'manage_options', 'hxmd-settings', [ __CLASS__, 'page_settings' ] );
 	}
 
 	public static function enqueue_assets( string $hook ): void {
-		$hxmd_hooks = [ 'toplevel_page_hxmd', 'hxmd_page_hxmd-new', 'hxmd_page_hxmd-settings' ];
+		$hxmd_hooks = [ 'toplevel_page_hxmd', 'hxmd_page_hxmd-new', 'hxmd_page_hxmd-settings', 'hxmd_page_hxmd-post-export' ];
 		if ( ! in_array( $hook, $hxmd_hooks, true ) ) {
 			return;
 		}
@@ -122,6 +124,41 @@ class HXMD_Admin {
 		if ( ! current_user_can( 'manage_options' ) ) { return; }
 		$types = HXMD_Log_Types::get_types();
 		include HXMD_PLUGIN_DIR . 'admin/views/settings.php';
+	}
+
+	public static function page_post_export(): void {
+		if ( ! current_user_can( 'manage_options' ) ) { return; }
+		include HXMD_PLUGIN_DIR . 'admin/views/post-export.php';
+	}
+
+	// Ajax: 投稿MD取得（コピー用）
+	public static function ajax_get_post_md(): void {
+		check_ajax_referer( 'hxmd_nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized', 403 );
+		}
+
+		$ids = array_map( 'intval', (array) ( $_POST['ids'] ?? [] ) );
+		if ( empty( $ids ) ) {
+			wp_send_json_error( 'No IDs', 400 );
+		}
+
+		$posts = [];
+		foreach ( $ids as $id ) {
+			$post = get_post( $id );
+			if ( $post instanceof WP_Post ) {
+				$posts[] = $post;
+			}
+		}
+		if ( empty( $posts ) ) {
+			wp_send_json_error( 'Not found', 404 );
+		}
+
+		$md = count( $posts ) === 1
+			? HXMD_Post_Export::render_post( $posts[0] )
+			: HXMD_Post_Export::render_bulk( $posts );
+
+		wp_send_json_success( [ 'md' => $md ] );
 	}
 
 	public static function handle_save(): void {
