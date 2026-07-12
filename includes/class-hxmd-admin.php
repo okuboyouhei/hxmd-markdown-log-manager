@@ -55,13 +55,6 @@ class HXMD_Admin {
 			'3.15.12',
 			[ 'strategy' => 'defer' ]
 		);
-		wp_enqueue_script(
-			'hxmd-htmx',
-			HXMD_PLUGIN_URL . 'assets/htmx.min.js',
-			[],
-			'2.0.10',
-			[ 'strategy' => 'defer' ]
-		);
 		wp_enqueue_style(
 			'hxmd-admin',
 			HXMD_PLUGIN_URL . 'admin/assets/hxmd-admin.css',

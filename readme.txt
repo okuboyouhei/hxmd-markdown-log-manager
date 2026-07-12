@@ -1,10 +1,10 @@
 === HXMD — Markdown Log Manager ===
 Contributors:      youheiokubo
-Tags:              markdown, log, inquiry, ai-ready, htmx
+Tags:              markdown, log, inquiry, ai-ready, alpine
 Requires at least: 6.4
 Tested up to:      7.0
 Requires PHP:      8.1
-Stable tag:        1.3.0
+Stable tag:        1.4.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,7 +21,7 @@ Collect inquiries and memos, export as AI-ready Markdown. No API required.
 * Customizable log types (phone, email, meeting, memo — and your own).
 * List view with sort, filter, and keyword search.
 * Bulk MD copy for multiple logs (ideal for NotebookLM ingestion).
-* Simple UI powered by Alpine.js + htmx.
+* Simple UI powered by Alpine.js.
 * Part of the HX Series (HXFE, HXSE, HXRV).
 
 **MD Export Example**
@@ -37,7 +37,7 @@ Collect inquiries and memos, export as AI-ready Markdown. No API required.
 
 **WAHX Stack**
 
-HXMD is part of the WAHX Stack (WordPress + Alpine.js + htmx + HX Series).
+HXMD is part of the WAHX Stack (WordPress + Alpine.js + htmx + HX Series). HXMD itself uses Alpine.js only — htmx is not needed for its admin UI.
 
 == Installation ==
 
@@ -66,6 +66,9 @@ Yes. Go to HXMD > Settings to add, edit, or delete custom types. You can also us
 3. MDプレビュー
 
 == Changelog ==
+
+= 1.4.0 =
+* Removed: bundled htmx — HXMD's admin UI is Alpine.js + fetch() only and never used htmx attributes. Removing the unused library reduces the plugin size and load. No functional change
 
 = 1.3.0 =
 * Added: Bulk delete — select multiple logs and delete them at once (confirmation dialog, nonce-protected)

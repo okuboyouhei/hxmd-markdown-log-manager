@@ -101,7 +101,6 @@ Returns: `{ success: true, data: { md: "..." } }`
 | Library | Version | Loading |
 |---|---|---|
 | Alpine.js | 3.15.12 | defer |
-| htmx | 2.0.10 | defer |
 
 Both bundled locally. Loaded on HXMD admin pages only.
 
