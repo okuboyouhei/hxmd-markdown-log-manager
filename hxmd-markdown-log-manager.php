@@ -3,7 +3,7 @@
  * Plugin Name: HXMD — Markdown Log Manager
  * Plugin URI:  https://github.com/okuboyouhei/hxmd-markdown-log-manager
  * Description: Collect inquiries and memos, export as AI-ready Markdown. No API required.
- * Version:     1.4.0
+ * Version:     1.4.1
  * Author:      youheiokubo
  * Author URI:  https://zenn.dev/youheiokubo
  * License:     GPL-2.0-or-later
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HXMD_VERSION',    '1.4.0' );
+define( 'HXMD_VERSION',    '1.4.1' );
 define( 'HXMD_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HXMD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 

@@ -42,6 +42,9 @@ class HXMD_HXRV_Bridge {
 		$content  = (string) ( $comment->content ?? '' );
 		$page_url = (string) ( $comment->page_url ?? '' );
 		$selector = (string) ( $comment->selector ?? '' );
+		// HXRV v1.2.0+ の任意項目。旧版では未定義なので ?? で無害に受ける。
+		$before   = trim( (string) ( $comment->before_text ?? '' ) );
+		$after    = trim( (string) ( $comment->after_text ?? '' ) );
 
 		// 件名はコメントの先頭行（40字まで）
 		$first_line = strtok( $content, "\n" );
@@ -52,10 +55,29 @@ class HXMD_HXRV_Bridge {
 			$subject = sprintf( '（ビジュアルレビュー #%d）', $id );
 		}
 
-		// 本文: コメント + 対象要素の情報
+		// Before/After（現状 → あるべき姿）ブロック。片方だけでも出力する。
+		$ba_lines = [];
+		if ( '' !== $before ) {
+			$ba_lines[] = "Before（現状）:\n{$before}";
+		}
+		if ( '' !== $after ) {
+			$ba_lines[] = "After（あるべき姿）:\n{$after}";
+		}
+		$ba_block = implode( "\n\n", $ba_lines );
+
+		// 本文: コメント + 対象要素の情報 + Before/After
 		$body = $content;
 		if ( $selector ) {
 			$body .= "\n\n対象要素: `{$selector}`";
+		}
+		if ( '' !== $ba_block ) {
+			$body .= "\n\n{$ba_block}";
+		}
+
+		// 対応指示: コメント + Before/After（修正の差分をエージェントに渡す）
+		$instruction = $content;
+		if ( '' !== $ba_block ) {
+			$instruction = '' !== $instruction ? "{$instruction}\n\n{$ba_block}" : $ba_block;
 		}
 
 		// 関連URL: 対象ページ
@@ -71,7 +93,7 @@ class HXMD_HXRV_Bridge {
 			'subject'      => $subject,
 			'body'         => $body,
 			'priority'     => 'medium',
-			'instruction'  => $content,
+			'instruction'  => $instruction,
 			'links'        => $links,
 			'status'       => 'open',
 			'source'       => 'hxrv',
