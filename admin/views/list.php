@@ -133,6 +133,8 @@ $hxmd_filter  = [
               <span class="hxmd-badge hxmd-source-hxfe">HXFE</span>
             <?php elseif ( 'hxrv' === ( $hxmd_log['source'] ?? 'manual' ) ) : ?>
               <span class="hxmd-badge hxmd-source-hxrv">HXRV</span>
+            <?php elseif ( 'hxsr' === ( $hxmd_log['source'] ?? 'manual' ) ) : ?>
+              <span class="hxmd-badge hxmd-source-hxsr">HXSR</span>
             <?php endif; ?>
           </td>
           <td><?php echo esc_html( HXMD_Categories::get_label( $hxmd_log['category'] ?? '' ) ); ?></td>

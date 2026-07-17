@@ -204,6 +204,10 @@ class HXMD_Admin {
 		update_option( 'hxmd_hxrv_enabled', isset( $_POST['hxrv_enabled'] ) ? '1' : '0' );
 		update_option( 'hxmd_hxrv_log_type', sanitize_key( wp_unslash( $_POST['hxrv_log_type'] ?? 'memo' ) ) );
 
+		// HXSR連携設定
+		update_option( 'hxmd_hxsr_enabled', isset( $_POST['hxsr_enabled'] ) ? '1' : '0' );
+		update_option( 'hxmd_hxsr_log_type', sanitize_key( wp_unslash( $_POST['hxsr_log_type'] ?? 'memo' ) ) );
+
 		wp_safe_redirect( admin_url( 'admin.php?page=hxmd-settings&saved=1' ) );
 		exit;
 	}

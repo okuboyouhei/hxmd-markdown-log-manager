@@ -139,6 +139,15 @@ hxmd-markdown-log-manager/
 - マッピング外のフィールドは「その他のフィールド」として本文に追記（情報を欠落させない）
 - 取り込みログは `source = 'hxfe'`、一覧で紫バッジ表示
 
+## HXSR連携（class-hxmd-hxsr-bridge.php）
+
+- HXSR v0.1.0以降の `hxsr_after_save` アクション（`$link, $schedules, $markdown`）を購読
+- `plugins_loaded` で `HXSR_VERSION` 定義チェック後に登録（HXSR無しでも安全）
+- 設定: `hxmd_hxsr_enabled`（'0'/'1'）、`hxmd_hxsr_log_type`
+- **HXFE/HXRVと異なり「更新型」**: HXSRは同じリンクを何度も編集保存するため、`hxmd_hxsr_link_map`（link_id ⇔ log_id 対応表、autoload=false）を持ち、既存ログがあれば更新・なければ新規作成。重複増殖を防ぐ。対応先ログが手動削除されていたらフォールバックで新規作成
+- capture() は slug/short_url/redirect_type/現在のリダイレクト先/アクセス数/予約スケジュールを `body` に構造化ブロックとして畳み込む（HXRVのBefore/After畳み込みの流儀を踏襲）
+- 取り込みログは `source = 'hxsr'`、一覧でインディゴバッジ（`.hxmd-source-hxsr`, #4338CA）表示
+
 ## Ajax エンドポイント
 
 - Action: `hxmd_get_md`（POST）
@@ -170,3 +179,4 @@ hxmd-markdown-log-manager/
 | HXSE | 情報検索 | hxse-code-first-search |
 | HXRV | フィードバック収集 | hxrv-ai-ready-visual-review |
 | HXMD | ログ構造化保存 | hxmd-markdown-log-manager |
+| HXSR | 短縮リンク・QR・リダイレクト管理 | hxsr-smart-redirecter |

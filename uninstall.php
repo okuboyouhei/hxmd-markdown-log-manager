@@ -19,3 +19,6 @@ delete_option( 'hxmd_hxfe_forms' );
 delete_option( 'hxmd_hxfe_log_type' );
 delete_option( 'hxmd_hxrv_enabled' );
 delete_option( 'hxmd_hxrv_log_type' );
+delete_option( 'hxmd_hxsr_enabled' );
+delete_option( 'hxmd_hxsr_log_type' );
+delete_option( 'hxmd_hxsr_link_map' );

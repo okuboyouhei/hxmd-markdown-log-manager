@@ -4,7 +4,7 @@ Tags:              markdown, log, inquiry, ai-ready, alpine
 Requires at least: 6.4
 Tested up to:      7.0
 Requires PHP:      8.1
-Stable tag:        1.4.1
+Stable tag:        1.4.2
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,10 @@ Yes. Go to HXMD > Settings to add, edit, or delete custom types. You can also us
 3. MDプレビュー
 
 == Changelog ==
+
+= 1.4.2 =
+* Added: HXSR — Smart Redirecter integration bridge. When HXSR is active, saving a short link can be captured into HXMD as a Markdown log (opt-in via Settings). Editing the same link updates the existing log instead of creating duplicates. The log records the short URL, redirect type, current destination, access count, and any scheduled redirects. Works standalone — nothing happens if HXSR is not installed
+* Added: "HXSR" source badge in the log list
 
 = 1.4.1 =
 * Improved: the HXRV bridge now captures the Before / After fields added in HXRV 1.2.0. When a pinned comment includes a current/expected pair, it is folded into the log's 詳細 (body) and 対応指示 (instruction) as a "Before（現状）→ After（あるべき姿）" block. Backward compatible — older HXRV without these fields is unaffected

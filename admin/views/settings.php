@@ -174,6 +174,40 @@ $hxmd_settings_saved = ! empty( $_GET['saved'] );
     <p class="description">HXRV（AI-Ready Visual Review）がインストールされていません。HXRV v1.0.1以降を有効化するとピンコメントの自動取り込みが利用できます。</p>
   <?php endif; ?>
 
+  <h2>HXSR連携</h2>
+  <?php if ( defined( 'HXSR_VERSION' ) ) : ?>
+    <p class="description">HXSR v<?php echo esc_html( HXSR_VERSION ); ?> を検出しました。ショートリンクの保存内容を自動的にログとして取り込めます（HXSR v0.1.0以降が必要）。</p>
+    <table class="form-table">
+      <tr>
+        <th>自動取り込み</th>
+        <td>
+          <label>
+            <input type="checkbox" name="hxsr_enabled" value="1" form="hxmd-settings-form"
+              <?php checked( get_option( 'hxmd_hxsr_enabled', '0' ), '1' ); ?>>
+            HXSRのリンク保存をHXMDログとして自動保存する
+          </label>
+          <p class="description">同じリンクを編集保存しても重複作成せず、対応する既存ログを更新します。</p>
+        </td>
+      </tr>
+      <tr>
+        <th><label for="hxsr_log_type">取り込み時の種別</label></th>
+        <td>
+          <select id="hxsr_log_type" name="hxsr_log_type" form="hxmd-settings-form">
+            <?php
+            $hxmd_hxsr_current = get_option( 'hxmd_hxsr_log_type', 'memo' );
+            foreach ( $types as $hxmd_t3_key => $hxmd_t3_label ) : ?>
+              <option value="<?php echo esc_attr( $hxmd_t3_key ); ?>" <?php selected( $hxmd_hxsr_current, $hxmd_t3_key ); ?>>
+                <?php echo esc_html( $hxmd_t3_label ); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </td>
+      </tr>
+    </table>
+  <?php else : ?>
+    <p class="description">HXSR（Smart Redirecter）がインストールされていません。HXSR v0.1.0以降を有効化するとショートリンクの自動取り込みが利用できます。</p>
+  <?php endif; ?>
+
   <hr>
   <h2>PHPフィルターでの拡張</h2>
   <p class="description">functions.php でも種別を追加できます。</p>
